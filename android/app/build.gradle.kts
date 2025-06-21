@@ -1,19 +1,13 @@
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
     id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
     namespace = "com.example.school_project"
     compileSdk = flutter.compileSdkVersion
-
-    // Change this line:
-    // ndkVersion = flutter.ndkVersion
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -40,7 +34,13 @@ android {
     }
 }
 
-
 flutter {
     source = "../.."
+}
+
+// ✅ Add this section below everything
+dependencies {
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.9.0")
 }

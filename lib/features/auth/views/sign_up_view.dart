@@ -58,7 +58,7 @@ class _SignUpViewState extends ConsumerState<SignUpView>
     super.dispose();
   }
 
-  Future<void> _signUp() async {
+Future<void> _signUp() async {
   if (!_validateForm()) return;
 
   setState(() => _isLoading = true);
@@ -68,39 +68,36 @@ class _SignUpViewState extends ConsumerState<SignUpView>
     await repo.signUp(
       _controllers.email.text.trim(),
       _controllers.password.text.trim(),
+      _controllers.firstName.text.trim(),
+      _controllers.lastName.text.trim(),
     );
 
     if (mounted) {
-      NotificationService.showToast('Account created successfully! Welcome aboard! 🎉');
-
-      await Future.delayed(const Duration(milliseconds: 500)); // let toast show
-
-      GoRouter.of(context).go('/sign-in');
+      NotificationService.showOverlayMessage(context, 'Account created successfully!');
+      context.go('/home');
     }
   } catch (e) {
     if (mounted) {
-      NotificationService.showToast('Sign up failed: ${e.toString()}');
+      NotificationService.showOverlayMessage(context, 'Sign up failed: ${e.toString()}');
     }
   } finally {
-    if (mounted) {
-      setState(() => _isLoading = false);
-    }
+    if (mounted) setState(() => _isLoading = false);
   }
 }
 
 bool _validateForm() {
   if (!_formKey.currentState!.validate()) {
-    NotificationService.showToast('Please fill all fields correctly');
+    NotificationService.showOverlayMessage(context,'Please fill all fields correctly');
     return false;
   }
 
   if (!_acceptTerms) {
-    NotificationService.showToast('Please accept the terms and conditions');
+    NotificationService.showOverlayMessage(context,'Please accept the terms and conditions');
     return false;
   }
 
   if (_controllers.password.text != _controllers.confirmPassword.text) {
-    NotificationService.showToast('Passwords do not match');
+    NotificationService.showOverlayMessage(context,'Passwords do not match');
     return false;
   }
 

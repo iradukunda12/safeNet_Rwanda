@@ -71,15 +71,15 @@ Future<void> _signIn() async {
     );
 
     if (mounted) {
-      NotificationService.showToast('Welcome back! 🎉');
+      NotificationService.showOverlayMessage(context,'Welcome back! 🎉');
 
       await Future.delayed(const Duration(milliseconds: 500));
 
-      GoRouter.of(context).go('/home'); // Navigate after successful login
+      GoRouter.of(context).go('/dashboard');  // <---- Redirect to dashboard here
     }
   } catch (e) {
     if (mounted) {
-      NotificationService.showToast('Sign in failed: ${e.toString()}');
+      NotificationService.showOverlayMessage(context,'Sign in failed: ${e.toString()}');
     }
   } finally {
     if (mounted) {
@@ -92,11 +92,13 @@ Future<void> _signIn() async {
 
   bool _validateForm() {
     if (!_formKey.currentState!.validate()) {
-      NotificationService.showToast('Please fill all fields correctly');
+      NotificationService.showOverlayMessage(context,'Please fill all fields correctly');
       return false;
     }
     return true;
   }
+
+
 @override
 Widget build(BuildContext context) {
   return Scaffold(
