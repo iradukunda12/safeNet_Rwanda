@@ -1,41 +1,62 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../features/auth/controllers/auth_controller.dart';
-import '../features/auth/views/sign_in_view.dart';
-import '../features/auth/views/sign_up_view.dart';
-import 'go_router_refresh_stream.dart';
-import '../features/onboarding/onboarding_view.dart';
-import '../features/onboarding/splash_view.dart';
+
+// Views
+import 'package:school_project/features/onboarding/splash_view.dart';
+import 'package:school_project/features/onboarding/onboarding_view.dart';
+import 'package:school_project/features/auth/views/sign_in_view.dart';
+import 'package:school_project/features/auth/views/sign_up_view.dart';
+import 'package:school_project/features/Dashboard/dashboard_home_view.dart';
+import 'package:school_project/features/Dashboard/contact_view.dart';
+import 'package:school_project/features/Dashboard/contact/crisis_message_view.dart';
+import 'package:school_project/features/Dashboard/contact/phone_view.dart';
+import 'package:school_project/features/Dashboard/contact/crisis_center_view.dart';
+import 'package:school_project/features/Dashboard/contact/chat_view.dart';
+import 'package:school_project/features/Dashboard/record_view.dart';
+import 'package:school_project/features/Dashboard/setting_view.dart';
+import 'package:school_project/features/Dashboard/Setting/notifications_page.dart';
+import 'package:school_project/features/Dashboard/Setting/import_export_page.dart';
+import 'package:school_project/features/Dashboard/Setting/about_page.dart';
+
+// Import the new record subpages
+import 'package:school_project/features/Dashboard/record/mood_monitoring_view.dart';
+import 'package:school_project/features/Dashboard/record/my_sleep_view.dart';
+import 'package:school_project/features/Dashboard/record/diary_view.dart';
+import 'package:school_project/features/Dashboard/record/journey_view.dart';
+import 'package:school_project/features/Dashboard/record/meal_record_view.dart';
+
+
+// Layouts
+import '../features/auth/authentication_layout.dart';
 import '../features/Dashboard/DashboardLayout.dart';
-import '../features/Dashboard/DashboardHomeView.dart';
+
+// Controllers
+import '../features/auth/controllers/auth_controller.dart';
+import 'go_router_refresh_stream.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
-
-  final routerRefresh = GoRouterRefreshStream(
-    ref.read(authStateProvider.stream),
-  );
+  final routerRefresh = GoRouterRefreshStream(ref.read(authStateProvider.stream));
 
   return GoRouter(
     initialLocation: '/',
     refreshListenable: routerRefresh,
 
     redirect: (context, state) {
-      final user = authState.maybeWhen(
-        data: (user) => user,
-        orElse: () => null,
-      );
-
+      final user = authState.maybeWhen(data: (user) => user, orElse: () => null);
       final isAuth = user != null;
-      final isAtAuth = state.uri.path == '/sign-in' || state.uri.path == '/sign-up';
-      final isAtOnboarding = state.uri.path == '/' || state.uri.path == '/onboarding';
 
-      if (!isAuth && !isAtAuth && !isAtOnboarding) {
+      final path = state.uri.path;
+      final isAtAuth = path == '/sign-in' || path == '/sign-up';
+      final isAtSplash = path == '/';
+      final isAtOnboarding = path == '/onboarding';
+
+      if (!isAuth && !(isAtAuth || isAtSplash || isAtOnboarding)) {
         return '/sign-in';
       }
 
-      if (isAuth && (state.uri.path == '/' || state.uri.path == '/sign-in' || state.uri.path == '/sign-up')) {
-        return '/dashboard';
+      if (isAuth && (isAtSplash || isAtOnboarding || isAtAuth)) {
+        return '/dashboard/home';
       }
 
       return null;
@@ -50,26 +71,110 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (context, state) => const OnboardingView(),
       ),
-      GoRoute(
-        path: '/sign-in',
-        builder: (context, state) => const SignInView(),
-      ),
-      GoRoute(
-        path: '/sign-up',
-        builder: (context, state) => const SignUpView(),
+
+      // Auth layout
+      ShellRoute(
+        builder: (context, state, child) => AuthenticationLayout(child: child),
+        routes: [
+          GoRoute(
+            path: '/sign-in',
+            builder: (context, state) => const SignInView(),
+          ),
+          GoRoute(
+            path: '/sign-up',
+            builder: (context, state) => const SignUpView(),
+          ),
+        ],
       ),
 
-      /// 👇 Authenticated layout
+      // Dashboard layout
       ShellRoute(
         builder: (context, state, child) {
-          return DashboardLayout(child: child);
+          final location = state.uri.toString();
+          int selectedIndex = 0;
+
+          if (location.startsWith('/dashboard/record')) selectedIndex = 1;
+          else if (location.startsWith('/dashboard/contact')) selectedIndex = 2;
+          else if (location.startsWith('/dashboard/settings')) selectedIndex = 3;
+          else selectedIndex = 0;
+
+          return DashboardLayoutWithIndex(child: child, selectedIndex: selectedIndex);
         },
         routes: [
           GoRoute(
-            path: '/dashboard',
+            path: '/dashboard/home',
             builder: (context, state) => const DashboardHomeView(),
           ),
-          // You can add more authenticated routes here
+     GoRoute(
+  path: '/dashboard/record',
+  builder: (context, state) => const RecordView(),
+  routes: [
+    GoRoute(
+      path: 'mood-monitoring',
+      builder: (context, state) => const MoodMonitoringView(),
+    ),
+    GoRoute(
+      path: 'my-sleep',
+      builder: (context, state) => const MySleepView(),
+    ),
+    GoRoute(
+      path: 'diary',
+      builder: (context, state) => const DiaryView(),
+    ),
+    GoRoute(
+      path: 'journey',
+      builder: (context, state) => const JourneyView(),
+    ),
+    GoRoute(
+      path: 'meal-record',
+      builder: (context, state) => const MealRecordView(),
+    ),
+  ],
+),
+
+          // ✅ Contact route with nested routes
+          GoRoute(
+            path: '/dashboard/contact',
+            builder: (context, state) => const ContactView(),
+            routes: [
+              GoRoute(
+                path: 'crisis-message',
+                builder: (context, state) => const CrisisMessageView(),
+              ),
+              GoRoute(
+                path: 'phone',
+                builder: (context, state) => const PhoneView(),
+              ),
+              GoRoute(
+                path: 'crisis-center',
+                builder: (context, state) => const CrisisCenterView(),
+              ),
+              GoRoute(
+                path: 'chat',
+                builder: (context, state) => const ChatView(),
+              ),
+            ],
+          ),
+
+          // ✅ Settings route with its subpages
+          GoRoute(
+            path: '/dashboard/settings',
+            builder: (context, state) => const SettingView(),
+            routes: [
+              GoRoute(
+                path: 'notification',
+                builder: (context, state) => const NotificationsPage(),
+              ),
+              GoRoute(
+                path: 'import-export',
+                builder: (context, state) => const ImportExportPage(),
+              ),
+              GoRoute(
+                path: 'about',
+                builder: (context, state) => const AboutPage(),
+              ),
+            ],
+          ),
         ],
       ),
     ],

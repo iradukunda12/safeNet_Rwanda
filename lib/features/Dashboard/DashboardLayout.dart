@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
-import '../../widgets/Dashboard/bottom_section.dart';     // adjust import paths accordingly
+import '../../widgets/Dashboard/bottom_section.dart';
 import '../../widgets/Dashboard/top_section.dart';
 
-class DashboardLayout extends StatelessWidget {
+class DashboardLayoutWithIndex extends StatelessWidget {
   final Widget child;
+  final int selectedIndex;
+  final String? fontFamily;
 
-  const DashboardLayout({super.key, required this.child});
+  const DashboardLayoutWithIndex({
+    super.key, 
+    required this.child, 
+    required this.selectedIndex,
+    this.fontFamily,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Better approach - use Theme inherited from parent
     return Scaffold(
       appBar: const TopSection(),
-      body: child,
-      bottomSheet: const BottomSection(),
+      body: Container(
+        color: const Color(0xff280446), // Your purple background
+        child: child,
+      ),
+      bottomSheet: BottomSection(selectedIndex: selectedIndex),
     );
   }
 }

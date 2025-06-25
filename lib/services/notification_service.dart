@@ -21,6 +21,8 @@ class NotificationService {
     // Remove after 2 seconds
     Future.delayed(const Duration(seconds: 2)).then((value) => overlayEntry.remove());
   }
+
+  void init() {}
 }
 
 class _ToastMessage extends StatefulWidget {

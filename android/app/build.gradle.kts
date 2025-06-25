@@ -10,10 +10,12 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
+  compileOptions {
+    isCoreLibraryDesugaringEnabled = true
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
@@ -21,7 +23,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.school_project"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23               // <-- Set minimum SDK version to 23 here
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -38,9 +40,13 @@ flutter {
     source = "../.."
 }
 
-// ✅ Add this section below everything
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
+
+    // ✅ Correct in Kotlin DSL
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }
+
+

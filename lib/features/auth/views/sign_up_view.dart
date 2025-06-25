@@ -9,6 +9,8 @@ import '../../../widgets/auth_form_field.dart';
 import '../../../widgets/gradient_button.dart';
 import '../../../utils/form_validators.dart';
 import '../../../services/notification_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class SignUpView extends ConsumerStatefulWidget {
   const SignUpView({super.key});
@@ -65,12 +67,24 @@ Future<void> _signUp() async {
 
   try {
     final repo = ref.read(authRepositoryProvider);
-    await repo.signUp(
+    final user = await repo.signUp(
       _controllers.email.text.trim(),
       _controllers.password.text.trim(),
       _controllers.firstName.text.trim(),
       _controllers.lastName.text.trim(),
     );
+
+    // ✅ Save user details in Firestore
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'firstName': _controllers.firstName.text.trim(),
+        'lastName': _controllers.lastName.text.trim(),
+        'email': _controllers.email.text.trim(),
+        'password': _controllers.password.text.trim(), // ⚠️ Not secure! See notes below.
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      print('User details saved to Firestore');
+    }
 
     if (mounted) {
       NotificationService.showOverlayMessage(context, 'Account created successfully!');
@@ -84,6 +98,8 @@ Future<void> _signUp() async {
     if (mounted) setState(() => _isLoading = false);
   }
 }
+
+
 
 bool _validateForm() {
   if (!_formKey.currentState!.validate()) {
