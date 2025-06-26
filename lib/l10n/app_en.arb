@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+  "appTitle": "My App",
+  "language": "Language",
+  "settings": "Settings",
+  "importExport": "Import / Export",
+  "import": "Import",
+  "export": "Export",
+  "languageSelection": "Select your language",
+  "english": "English",
+  "french": "French"
+}

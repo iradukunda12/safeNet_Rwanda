@@ -1,56 +1,41 @@
-import 'dart:io';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+final notificationServiceProvider = Provider((ref) {
+  return NotificationService()..init();
+});
 
 class NotificationService {
-  final _firebaseMessaging = FirebaseMessaging.instance;
-  final _localNotifications = FlutterLocalNotificationsPlugin();
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    // Request permission
-    NotificationSettings settings = await _firebaseMessaging.requestPermission();
+    // ✅ Request permission (iOS/Android 13+)
+    await _messaging.requestPermission();
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('✅ Push notification permission granted');
-    }
-
-    // Local notification setup
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidInit);
-
+    // ✅ Setup local notification plugin
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    final initSettings = InitializationSettings(android: androidSettings);
     await _localNotifications.initialize(initSettings);
 
-    // iOS foreground
-    if (Platform.isIOS) {
-      await _firebaseMessaging.setForegroundNotificationPresentationOptions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-    }
+    // ✅ Get FCM token
+    final token = await _messaging.getToken();
+    print('🔑 FCM Token: $token');
 
-    // Foreground
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification? notification = message.notification;
+    // ✅ Foreground message listener
+    FirebaseMessaging.onMessage.listen((message) {
+      final notification = message.notification;
       if (notification != null) {
-        _showLocalNotification(notification.title, notification.body);
+        _localNotifications.show(
+          DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          notification.title,
+          notification.body,
+          const NotificationDetails(
+            android: AndroidNotificationDetails('default_channel', 'General Notifications'),
+          ),
+        );
       }
     });
-  }
-
-  Future<void> _showLocalNotification(String? title, String? body) async {
-    const androidDetails = AndroidNotificationDetails(
-      'default_channel',
-      'Default',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const details = NotificationDetails(android: androidDetails);
-    await _localNotifications.show(0, title, body, details);
-  }
-
-  Future<String?> getDeviceToken() async {
-    return _firebaseMessaging.getToken();
   }
 }

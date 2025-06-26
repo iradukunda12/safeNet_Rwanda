@@ -5,56 +5,60 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=3.8.1 <4.0.0"  # More precise version constraint
+  sdk: ">=3.8.1 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+
+  # Flutter’s built-in localization support
+  flutter_localizations:
+    sdk: flutter
+
   cupertino_icons: ^1.0.8
   font_awesome_flutter: ^10.7.0
   firebase_messaging: 15.2.7
   flutter_local_notifications: ^17.1.0
   timezone: ^0.9.2
-  intl: ^0.18.1
+  intl: ^0.20.2    # ← Upgraded here
   shared_preferences: ^2.2.2  
   url_launcher: ^6.2.5  
-  
+  permission_handler: ^11.1.0
+  cloud_functions: ^5.5.2
+  file_picker: ^10.2.0
+  path_provider: ^2.1.5
 
-
-
-
-  # Firebase - Updated versions
+  # Firebase services
   firebase_auth: ^5.6.0
   google_sign_in: ^7.0.0
   firebase_core: ^3.14.0
   cloud_firestore: ^5.6.9
 
-  # State Management & DI
+  # State Management & Hooks
   flutter_riverpod: ^2.4.9
   hooks_riverpod: ^2.4.9
   flutter_hooks: ^0.20.5
 
-
   # Navigation
   go_router: ^14.0.2
 
-  # Helpers
-  fluttertoast: ^8.2.2  # Moved from dev_dependencies to main
-  logger: ^2.0.2       # For better logging
+  # Helpers & UI
+  fluttertoast: ^8.2.2
+  logger: ^2.0.2
   flutter_svg: ^2.0.7
   lottie: ^3.3.1
   flutter_gen: ^5.10.0
   animated_emoji: ^3.2.1
-  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  build_runner: ^2.4.6 # For code generation if needed
+  build_runner: ^2.4.6
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/logo.png
@@ -63,4 +67,3 @@ flutter:
     - assets/support.jpg
     - assets/illustrations/moods/
     - assets/illustrations/modules/
-   
