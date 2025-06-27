@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CrisisMessageView extends StatefulWidget {
   const CrisisMessageView({super.key});
@@ -9,40 +9,40 @@ class CrisisMessageView extends StatefulWidget {
 }
 
 class _CrisisMessageViewState extends State<CrisisMessageView> {
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   Future<void> _sendMessage() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final contact = contactController.text.trim();
-      final message = messageController.text.trim();
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('crisis_contact', contact);
-      await prefs.setString('crisis_message', message);
+      await FirebaseFirestore.instance.collection('crisis_messages').add({
+        'firstName': firstNameController.text.trim(),
+        'lastName': lastNameController.text.trim(),
+        'email': emailController.text.trim(),
+        'contact': contactController.text.trim(),
+        'message': messageController.text.trim(),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Message saved successfully!'),
+            content: const Text('Thanks for your feedback!'),
             backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
           ),
         );
-
+        _formKey.currentState!.reset();
+        firstNameController.clear();
+        lastNameController.clear();
+        emailController.clear();
         contactController.clear();
         messageController.clear();
       }
@@ -50,275 +50,155 @@ class _CrisisMessageViewState extends State<CrisisMessageView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Failed to save message. Please try again.'),
+            content: const Text('Failed to send. Try again.'),
             backgroundColor: Colors.red.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
           ),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Widget _buildInput({
+    required String label,
+    required IconData icon,
+    required TextEditingController controller,
+    required String? Function(String?) validator,
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        prefixIcon: Icon(icon, color: Colors.white70),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      validator: validator,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff280446),
-      appBar: AppBar(
-        backgroundColor: const Color(0xff280446),
-        elevation: 0,
-        title: const Text(
-          'Crisis Message',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+  appBar: AppBar(
+  backgroundColor: const Color(0xff280446),
+  elevation: 0,
+  centerTitle: true,
+  title: const Text(
+    'Give Us Feedback',
+    style: TextStyle(
+      color: Colors.white, // Title color set to white
+      fontWeight: FontWeight.w600,
+      fontSize: 20,
+    ),
+  ),
+),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            // Form container
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xff8654B0),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              // First & Last Name on the same row
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: _buildInput(
+                        label: 'First Name',
+                        icon: Icons.person,
+                        controller: firstNameController,
+                        validator: (val) =>
+                            val == null || val.trim().isEmpty ? 'Required' : null,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: _buildInput(
+                        label: 'Last Name',
+                        icon: Icons.person_outline,
+                        controller: lastNameController,
+                        validator: (val) =>
+                            val == null || val.trim().isEmpty ? 'Required' : null,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Header
-                    const Text(
-                      'Emergency Contact Setup',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Set up your emergency contact and message',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
-                    // Contact field
-                    TextFormField(
-                      controller: contactController,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Phone number or Email',
-                        labelStyle: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.contact_phone,
-                          color: Colors.white70,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.white38,
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.white,
-                            width: 2,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 2,
-                          ),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a contact';
-                        }
-                        return null;
-                      },
+              // Email
+              _buildInput(
+                label: 'Email',
+                icon: Icons.email,
+                controller: emailController,
+                validator: (val) =>
+                    val == null || !val.contains('@') ? 'Invalid email' : null,
+              ),
+              const SizedBox(height: 16),
+
+              // Contact
+              _buildInput(
+                label: 'Contact (Phone or Email)',
+                icon: Icons.phone,
+                controller: contactController,
+                validator: (val) =>
+                    val == null || val.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 16),
+
+              // Message
+              _buildInput(
+                label: 'Your Feedback Message',
+                icon: Icons.message,
+                controller: messageController,
+                validator: (val) =>
+                    val == null || val.trim().isEmpty ? 'Required' : null,
+                maxLines: 4,
+              ),
+              const SizedBox(height: 24),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _sendMessage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xff4EA3AD),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    // Message field
-                    TextFormField(
-                      controller: messageController,
-                      maxLines: 4,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Emergency Message',
-                        labelStyle: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                        ),
-                        hintText: 'Type your emergency message here...',
-                        hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.white38,
-                            width: 1.5,
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : const Text(
+                          'Submit Feedback',
+                          style: TextStyle(
+                              color: Colors.white, // Button text color set to white
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                           ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.white,
-                            width: 2,
-                          ),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Colors.redAccent,
-                            width: 2,
-                          ),
-                        ),
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a message';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Send button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _sendMessage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff4EA3AD),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.grey.shade400,
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            : const Text(
-                                'Save Emergency Message',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Info section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.info_outline,
-                    color: Colors.white70,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Your information is stored securely on your device',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -326,6 +206,9 @@ class _CrisisMessageViewState extends State<CrisisMessageView> {
 
   @override
   void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    emailController.dispose();
     contactController.dispose();
     messageController.dispose();
     super.dispose();

@@ -22,17 +22,24 @@ dependencies:
   timezone: ^0.9.2
   intl: ^0.20.2    # ← Upgraded here
   shared_preferences: ^2.2.2  
-  url_launcher: ^6.2.5  
   permission_handler: ^11.1.0
   cloud_functions: ^5.5.2
   file_picker: ^10.2.0
   path_provider: ^2.1.5
-
+  url_launcher: ^6.3.1
+  uuid: ^4.3.3
+  http: ^1.1.0
   # Firebase services
   firebase_auth: ^5.6.0
   google_sign_in: ^7.0.0
   firebase_core: ^3.14.0
   cloud_firestore: ^5.6.9
+  firebase_crashlytics: ^4.3.7
+  firebase_analytics: ^11.5.0
+  flutter_tts: ^3.6.3
+  speech_to_text: ^6.4.0
+
+
 
   # State Management & Hooks
   flutter_riverpod: ^2.4.9

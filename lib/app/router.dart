@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 // Views
 import 'package:school_project/features/onboarding/splash_view.dart';
@@ -18,13 +20,13 @@ import 'package:school_project/features/Dashboard/Setting/notifications_page.dar
 import 'package:school_project/features/Dashboard/Setting/import_export_page.dart';
 import 'package:school_project/features/Dashboard/Setting/about_page.dart';
 
-// Import the new record subpages
+// Record subpages
 import 'package:school_project/features/Dashboard/record/mood_monitoring_view.dart';
 import 'package:school_project/features/Dashboard/record/my_sleep_view.dart';
 import 'package:school_project/features/Dashboard/record/diary_view.dart';
 import 'package:school_project/features/Dashboard/record/journey_view.dart';
 import 'package:school_project/features/Dashboard/record/meal_record_view.dart';
-
+import 'package:school_project/features/Dashboard/Contact/health_page.dart';
 
 // Layouts
 import '../features/auth/authentication_layout.dart';
@@ -37,8 +39,9 @@ import 'go_router_refresh_stream.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
   final routerRefresh = GoRouterRefreshStream(ref.read(authStateProvider.stream));
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: '/',
     refreshListenable: routerRefresh,
 
@@ -105,34 +108,34 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/dashboard/home',
             builder: (context, state) => const DashboardHomeView(),
           ),
-     GoRoute(
-  path: '/dashboard/record',
-  builder: (context, state) => const RecordView(),
-  routes: [
-    GoRoute(
-      path: 'mood-monitoring',
-      builder: (context, state) => const MoodMonitoringView(),
-    ),
-    GoRoute(
-      path: 'my-sleep',
-      builder: (context, state) => const MySleepView(),
-    ),
-    GoRoute(
-      path: 'diary',
-      builder: (context, state) => const DiaryView(),
-    ),
-    GoRoute(
-      path: 'journey',
-      builder: (context, state) => const JourneyView(),
-    ),
-    GoRoute(
-      path: 'meal-record',
-      builder: (context, state) => const MealRecordView(),
-    ),
-  ],
-),
+          GoRoute(
+            path: '/dashboard/record',
+            builder: (context, state) => const RecordView(),
+            routes: [
+              GoRoute(
+                path: 'mood-monitoring',
+                builder: (context, state) => const MoodMonitoringView(),
+              ),
+              GoRoute(
+                path: 'my-sleep',
+                builder: (context, state) => const MySleepView(),
+              ),
+              GoRoute(
+                path: 'diary',
+                builder: (context, state) => const DiaryView(),
+              ),
+              GoRoute(
+                path: 'journey',
+                builder: (context, state) => const JourneyView(),
+              ),
+              GoRoute(
+                path: 'meal-record',
+                builder: (context, state) => const MealRecordView(),
+              ),
+            ],
+          ),
 
-          // ✅ Contact route with nested routes
+          // Contact route with nested routes
           GoRoute(
             path: '/dashboard/contact',
             builder: (context, state) => const ContactView(),
@@ -151,12 +154,16 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
               GoRoute(
                 path: 'chat',
-                builder: (context, state) => const ChatView(),
+                builder: (context, state) => ChatView(),
+              ),
+              GoRoute(
+                path: 'speech',
+                builder: (context, state) => HealthBlogPage(),
               ),
             ],
           ),
 
-          // ✅ Settings route with its subpages
+          // Settings route with subpages
           GoRoute(
             path: '/dashboard/settings',
             builder: (context, state) => const SettingView(),
@@ -179,4 +186,27 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+
+  router.routerDelegate.addListener(() {
+    final location = router.routerDelegate.currentConfiguration.location;
+    if (location != null) {
+      analytics.setCurrentScreen(screenName: location).then((_) {
+        debugPrint('Analytics: Logged screen $location');
+      }).catchError((e) {
+        debugPrint('Analytics: Failed to log screen: $e');
+      });
+
+      analytics.logEvent(
+        name: 'screen_view',
+        parameters: {'screen_name': location},
+      );
+    }
+  });
+
+  return router;
 });
+
+extension on RouteMatchList {
+   get location => null;
+}

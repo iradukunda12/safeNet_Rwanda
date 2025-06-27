@@ -12,11 +12,13 @@ class _ContactViewState extends State<ContactView> {
   int activeIndex = 0;
 
   final List<_ContactLink> links = [
-    _ContactLink(icon: Icons.warning_amber_outlined, title: 'Crisis Message'),
+    _ContactLink(icon: Icons.feedback_outlined, title: 'Feedback '),
     _ContactLink(icon: Icons.vibration, title: 'Phone'),
-    _ContactLink(icon: Icons.house, title: 'Crisis Center'), // ✅ Changed icon to house
+    _ContactLink(icon: Icons.forum_outlined, title: 'Community Forum'),
+
     _ContactLink(icon: Icons.message, title: 'Chat'),
-    _ContactLink(icon: Icons.contacts, title: 'My Contact'),
+    _ContactLink(icon: Icons.mic, title: 'Speech to Text'),
+
   ];
 
   @override
@@ -57,7 +59,7 @@ class _ContactViewState extends State<ContactView> {
     '/dashboard/contact/phone',
     '/dashboard/contact/crisis-center',
     '/dashboard/contact/chat',
-    '/dashboard/contact', // My Contact
+    '/dashboard/contact/speech', // My Contact
   ];
 
 GoRouter.of(context).go(routes[idx]);

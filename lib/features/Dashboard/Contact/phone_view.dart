@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PhoneView extends StatefulWidget {
   const PhoneView({super.key});
@@ -13,14 +14,16 @@ class _PhoneViewState extends State<PhoneView> {
   bool _isLoading = false;
 
   final List<Map<String, String>> countries = [
-    {'name': 'United States', 'phone': '988', 'description': 'Suicide & Crisis Lifeline'},
-    {'name': 'United Kingdom', 'phone': '116 123', 'description': 'Samaritans Crisis Support'},
-    {'name': 'Canada', 'phone': '1-833-456-4566', 'description': 'Talk Suicide Canada'},
-    {'name': 'Australia', 'phone': '13 11 14', 'description': 'Lifeline Australia'},
-    {'name': 'Germany', 'phone': '0800 111 0 111', 'description': 'Telefonseelsorge'},
-    {'name': 'France', 'phone': '3114', 'description': 'Numéro National Prévention'},
-    {'name': 'Japan', 'phone': '0570-064-556', 'description': 'Japan Suicide Prevention'},
-    {'name': 'South Korea', 'phone': '1393', 'description': 'Korea Suicide Prevention'},
+    {
+      'name': 'United States',
+      'phone': '+250791813289',
+      'description': 'Suicide & Crisis Lifeline'
+    },
+    {
+      'name': 'United Kingdom',
+      'phone': '+2505169053',
+      'description': 'Samaritans Crisis Support'
+    },
   ];
 
   Future<void> _saveSelection() async {
@@ -70,80 +73,95 @@ class _PhoneViewState extends State<PhoneView> {
     );
   }
 
- Widget _buildCountryCard(int index) {
-  final country = countries[index];
-  final isSelected = selectedCountryIndex == index;
+  Future<void> _launchPhoneDialer(String phoneNumber) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    } else {
+      _showSnackBar('Could not launch dialer', Colors.red.shade600);
+    }
+  }
 
-  return GestureDetector(
-    onTap: () {
-      setState(() {
-        selectedCountryIndex = index;
-      });
-      _saveSelection();
-    },
-    child: Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xff4EA3AD) : const Color(0xff8654B0),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Left side: title + description
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  country['name']!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  country['description']!,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
-                ),
-              ],
+  Widget _buildCountryCard(int index) {
+    final country = countries[index];
+    final isSelected = selectedCountryIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCountryIndex = index;
+        });
+        _saveSelection();
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xff4EA3AD) : const Color(0xff8654B0),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
-          ),
-
-          // Right side: phone icon + number
-          Row(
-            children: [
-              const Icon(Icons.phone, color: Colors.white70, size: 18),
-              const SizedBox(width: 6),
-              Text(
-                country['phone']!,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Left side: title + description
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    country['name']!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    country['description']!,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+
+            // Right side: phone icon + number with tap to call
+            InkWell(
+              onTap: () {
+                _launchPhoneDialer(country['phone']!);
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.phone, color: Colors.white70, size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    country['phone']!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({Key? key}) : super(key: key);
@@ -26,22 +27,49 @@ Explore the app to discover how Nepanikar can simplify your life and keep you co
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          decoration: BoxDecoration(
-            color: const Color(0xff8654B0),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            _appDescription,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 16,
-              height: 1.5,
-              letterSpacing: 0.5,
-            ),
-            textAlign: TextAlign.center,
+        child: SingleChildScrollView(  // To avoid overflow if small screen
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                decoration: BoxDecoration(
+                  color: const Color(0xff8654B0),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  _appDescription,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    height: 1.5,
+                    letterSpacing: 0.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  // Force a crash to test Crashlytics
+                  FirebaseCrashlytics.instance.crash();
+                },
+                child: const Text(
+                  'Force Crash (Test Crashlytics)',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
           ),
         ),
       ),

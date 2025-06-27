@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth;
+  final FirebaseAnalytics _analytics;
 
-  AuthRepository(this._auth);
+  AuthRepository(this._auth, this._analytics);
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
@@ -25,6 +27,10 @@ class AuthRepository {
           'lastName': lastName,
           'createdAt': FieldValue.serverTimestamp(),
         });
+
+        // ✅ Analytics: log sign-up and set user ID
+        await _analytics.logSignUp(signUpMethod: 'email');
+        await _analytics.setUserId(id: user.uid);
       }
 
       return user;
@@ -34,36 +40,43 @@ class AuthRepository {
     }
   }
 
-Future<User?> signIn(String email, String password) async {
-  final credential = await _auth.signInWithEmailAndPassword(
-    email: email,
-    password: password,
-  );
-  final user = credential.user;
+  Future<User?> signIn(String email, String password) async {
+    final credential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    final user = credential.user;
 
-  if (user != null) {
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
-    if (!userDoc.exists) {
-      // Create a default profile if not found
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'uid': user.uid,
-        'email': email,
-        'firstName': '',
-        'lastName': '',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      if (!userDoc.exists) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'email': email,
+          'firstName': '',
+          'lastName': '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // ✅ Analytics: log login and set user ID
+      await _analytics.logLogin(loginMethod: 'email');
+      await _analytics.setUserId(id: user.uid);
     }
+
+    return user;
   }
-
-  return user;
-}
-
 
   User? getCurrentUser() => _auth.currentUser;
 
-  Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    await _auth.signOut();
+
+    // ✅ Analytics: log custom logout event
+    await _analytics.logEvent(name: 'logout');
+  }
 }
