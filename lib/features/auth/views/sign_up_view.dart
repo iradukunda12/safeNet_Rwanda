@@ -274,27 +274,27 @@ bool _validateForm() {
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
             child: RichText(
-              text: TextSpan(
-                style: const TextStyle(
+              text: const TextSpan(
+                style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
                   height: 1.4,
                 ),
                 children: [
-                  const TextSpan(text: 'I agree to the '),
+                  TextSpan(text: 'I agree to the '),
                   TextSpan(
                     text: 'Terms and Conditions',
                     style: TextStyle(
-                      color: const Color(0xFF667eea),
+                      color: Color(0xFF667eea),
                       fontWeight: FontWeight.w500,
                       decoration: TextDecoration.underline,
                     ),
                   ),
-                  const TextSpan(text: ' and '),
+                  TextSpan(text: ' and '),
                   TextSpan(
                     text: 'Privacy Policy',
                     style: TextStyle(
-                      color: const Color(0xFF667eea),
+                      color: Color(0xFF667eea),
                       fontWeight: FontWeight.w500,
                       decoration: TextDecoration.underline,
                     ),

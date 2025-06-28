@@ -96,12 +96,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           final location = state.uri.toString();
           int selectedIndex = 0;
 
-          if (location.startsWith('/dashboard/record')) selectedIndex = 1;
-          else if (location.startsWith('/dashboard/contact')) selectedIndex = 2;
+          if (location.startsWith('/dashboard/record')) {
+            selectedIndex = 1;
+          } else if (location.startsWith('/dashboard/contact')) selectedIndex = 2;
           else if (location.startsWith('/dashboard/settings')) selectedIndex = 3;
           else selectedIndex = 0;
 
-          return DashboardLayoutWithIndex(child: child, selectedIndex: selectedIndex);
+          return DashboardLayoutWithIndex(selectedIndex: selectedIndex, child: child);
         },
         routes: [
           GoRoute(
@@ -154,11 +155,11 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
               GoRoute(
                 path: 'chat',
-                builder: (context, state) => ChatView(),
+                builder: (context, state) => const ChatView(),
               ),
               GoRoute(
                 path: 'speech',
-                builder: (context, state) => HealthBlogPage(),
+                builder: (context, state) => const HealthBlogPage(),
               ),
             ],
           ),

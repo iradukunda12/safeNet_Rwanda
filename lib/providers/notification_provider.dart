@@ -212,7 +212,7 @@ class NotificationService {
         message.hashCode,
         notification.title,
         notification.body,
-        NotificationDetails(
+        const NotificationDetails(
           android: AndroidNotificationDetails(
             'random_messages_channel',
             'Random Messages',
@@ -223,7 +223,7 @@ class NotificationService {
             enableVibration: true,
             playSound: true,
           ),
-          iOS: const DarwinNotificationDetails(
+          iOS: DarwinNotificationDetails(
             presentAlert: true,
             presentBadge: true,
             presentSound: true,

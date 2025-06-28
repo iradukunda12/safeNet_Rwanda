@@ -23,8 +23,8 @@ class _ContactViewState extends State<ContactView> {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = const Color(0xff491475);
-    final activeColor = const Color(0xff4EA3AD);
+    const bgColor = Color(0xff491475);
+    const activeColor = Color(0xff4EA3AD);
 
     return Scaffold(
       backgroundColor: bgColor,

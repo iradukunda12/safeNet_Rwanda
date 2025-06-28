@@ -276,7 +276,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${title} set for ${time.format(context)}'),
+            content: Text('$title set for ${time.format(context)}'),
             backgroundColor: const Color(0xff8654B0),
             duration: const Duration(seconds: 2),
           ),

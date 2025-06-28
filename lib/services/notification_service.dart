@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class NotificationService {
   static void showOverlayMessage(BuildContext context, String message) {
     final overlay = Overlay.of(context);
-    if (overlay == null) return;
 
     // Create entry
     final overlayEntry = OverlayEntry(

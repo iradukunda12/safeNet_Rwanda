@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class AboutPage extends StatelessWidget {
-  const AboutPage({Key? key}) : super(key: key);
+  const AboutPage({super.key});
 
   static const _appDescription = '''
 Nepanikar is a modern app designed to enhance your daily productivity with seamless features, intuitive design, and reliable performance. 
@@ -38,9 +38,9 @@ Explore the app to discover how Nepanikar can simplify your life and keep you co
                   color: const Color(0xff8654B0),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Text(
+                child: const Text(
                   _appDescription,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white70,
                     fontSize: 16,
                     height: 1.5,

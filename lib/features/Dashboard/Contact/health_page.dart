@@ -128,7 +128,7 @@ class _HealthBlogPageState extends State<HealthBlogPage> {
                         child: ListTile(
                           title: Text(blog['title']),
                           subtitle: Text(
-                            blog['content'].toString().substring(0, 60) + '...',
+                            '${blog['content'].toString().substring(0, 60)}...',
                           ),
                           trailing: PopupMenuButton(
                             itemBuilder: (_) => [

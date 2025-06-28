@@ -68,19 +68,19 @@ class TopSection extends ConsumerWidget implements PreferredSizeWidget {
   }
 
   Widget _buildNotLoggedInState() {
-    return Row(
+    return const Row(
       children: [
         CircleAvatar(
           radius: 22,
           backgroundColor: Colors.white24,
-          child: const Icon(
+          child: Icon(
             Icons.person_outline,
             size: 24,
             color: Colors.white,
           ),
         ),
-        const SizedBox(width: 12),
-        const Expanded(
+        SizedBox(width: 12),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,

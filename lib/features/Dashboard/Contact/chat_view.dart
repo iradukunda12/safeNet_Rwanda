@@ -179,7 +179,7 @@ class _ChatViewState extends State<ChatView> with SingleTickerProviderStateMixin
                 child: Row(
                   children: [
                     Expanded(
-                      child: Container(
+                      child: SizedBox(
                         height: 32,
                         child: TextField(
                           controller: _aiController,
@@ -211,7 +211,7 @@ class _ChatViewState extends State<ChatView> with SingleTickerProviderStateMixin
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Container(
+                    SizedBox(
                       height: 32,
                       width: 32,
                       child: IconButton(
@@ -300,7 +300,7 @@ class _ChatViewState extends State<ChatView> with SingleTickerProviderStateMixin
                 child: Row(
                   children: [
                     Expanded(
-                      child: Container(
+                      child: SizedBox(
                         height: 32,
                         child: TextField(
                           controller: _liveChatController,
@@ -331,7 +331,7 @@ class _ChatViewState extends State<ChatView> with SingleTickerProviderStateMixin
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Container(
+                    SizedBox(
                       height: 32,
                       width: 32,
                       child: IconButton(

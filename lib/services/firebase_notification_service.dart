@@ -16,7 +16,7 @@ class NotificationService {
 
     // ✅ Setup local notification plugin
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    final initSettings = InitializationSettings(android: androidSettings);
+    const initSettings = InitializationSettings(android: androidSettings);
     await _localNotifications.initialize(initSettings);
 
     // ✅ Get FCM token

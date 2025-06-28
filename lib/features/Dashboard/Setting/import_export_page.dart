@@ -7,7 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImportExportPage extends StatelessWidget {
-  const ImportExportPage({Key? key}) : super(key: key);
+  const ImportExportPage({super.key});
 
   /// 📥 Import JSON file and store data into Firestore
   Future<void> _importData(BuildContext context) async {

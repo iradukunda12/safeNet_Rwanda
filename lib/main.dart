@@ -56,11 +56,9 @@ class _MyAppState extends ConsumerState<MyApp> {
     // Hook into router's navigator to listen for route changes
     router.routerDelegate.addListener(() {
       final currentRoute = router.routerDelegate.currentConfiguration;
-      if (currentRoute != null) {
-        // Log the screen name based on route name or path
-        logCurrentScreen(currentRoute.toString());
-      }
-    });
+      // Log the screen name based on route name or path
+      logCurrentScreen(currentRoute.toString());
+        });
 
     // Initialize notifications
     ref.read(notificationServiceProvider);
